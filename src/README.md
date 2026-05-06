@@ -70,4 +70,3 @@ TaskFlow is a production-ready, full-stack collaborative task management applica
 
 ## Deployment
 
-The app is optimized for the Anything platform's serverless architecture. Simply click "Publish" to deploy both the frontend and backend to production.

@@ -5,6 +5,7 @@
 	"scripts": {
 		"build": "react-router build",
 		"dev": "react-router dev",
+		"db:schema": "node scripts/apply-schema.mjs",
 		"start": "node ./build/server/index.js",
 		"typecheck": "react-router typegen && tsc --noEmit"
 	},
@@ -21,7 +22,9 @@
 		"argon2": "^0.43.0",
 		"date-fns": "^4.1.0",
 		"html-to-image": "^1.11.13",
+		"isbot": "^5",
 		"lucide-react": "0.358.0",
+		"pg": "^8.20.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-idle-timer": "^5.7.2",
@@ -31,8 +34,7 @@
 		"recharts": "^2.12.0",
 		"serialize-error": "^12.0.0",
 		"sonner": "^2.0.3",
-		"ws": "^8.18.2",
-		"isbot": "^5"
+		"ws": "^8.18.2"
 	},
 	"devDependencies": {
 		"@react-router/dev": "^7.6.0",
