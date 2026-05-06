@@ -1,9 +1,8 @@
 import { readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
 import { Hono } from 'hono';
 import type { Handler } from 'hono/types';
-import updatedFetch from '../src/__create/fetch';
 
 const API_BASENAME = '/api';
 const api = new Hono();
@@ -11,9 +10,6 @@ const api = new Hono();
 // During production builds this file is bundled into build/server/assets, so
 // resolve API route files from the project root instead of the bundle folder.
 const apiRoot = resolve(process.cwd(), 'src/app/api');
-if (globalThis.fetch) {
-  globalThis.fetch = updatedFetch;
-}
 
 // Recursively find all route.js files
 async function findRouteFiles(dir: string): Promise<string[]> {
