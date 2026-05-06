@@ -3,10 +3,10 @@
  * not attempt to edit it. Modifying it will have no effect on your project as it is controlled by our system.
  * Do not import @auth/create or @auth/create anywhere else or it may break. This is an internal package.
  */
-import CreateAuth from "@auth/create"
+import CreateAuth from "./__create/@auth/create.js"
 import Credentials from "@auth/core/providers/credentials"
 import { CredentialsSignin } from '@auth/core/errors'
-import { Pool } from '@neondatabase/serverless'
+import pg from "pg"
 import { hash, verify } from 'argon2'
 
 function Adapter(client) {
@@ -250,8 +250,11 @@ function Adapter(client) {
     },
   };
 }
-const pool = new Pool({
+const pool = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL?.includes("railway.internal")
+        ? false
+        : { rejectUnauthorized: false },
     });
 const adapter = Adapter(pool);
 
