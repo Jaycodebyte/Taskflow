@@ -1,10 +1,10 @@
-import sql from "@/app/api/utils/sql";
+import sql from "../../../utils/sql.js";
 import {
   getLocalProjects,
   getLocalUsers,
   useLocalStore,
-} from "@/app/api/utils/localStore";
-import { auth } from "@/auth";
+} from "../../../utils/localStore.js";
+import { auth } from "../../../../../auth.js";
 
 export async function POST(request, { params }) {
   try {

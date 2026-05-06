@@ -1,6 +1,6 @@
-import sql from "@/app/api/utils/sql";
-import { useLocalStore } from "@/app/api/utils/localStore";
-import { auth } from "@/auth";
+import sql from "../../utils/sql.js";
+import { useLocalStore } from "../../utils/localStore.js";
+import { auth } from "../../../../auth.js";
 
 export async function GET() {
   try {
