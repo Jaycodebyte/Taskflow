@@ -3,7 +3,6 @@ import nodeConsole from 'node:console';
 import { skipCSRFCheck } from '@auth/core';
 import Credentials from '@auth/core/providers/credentials';
 import { authHandler, initAuthConfig } from '@hono/auth-js';
-import { Pool, neonConfig } from '@neondatabase/serverless';
 import { hash, verify } from 'argon2';
 import { Hono } from 'hono';
 import { contextStorage, getContext } from 'hono/context-storage';
@@ -14,12 +13,11 @@ import { requestId } from 'hono/request-id';
 import { randomUUID } from 'node:crypto';
 import { createHonoServer } from 'react-router-hono-server/node';
 import { serializeError } from 'serialize-error';
-import ws from 'ws';
+import pg from 'pg';
 import NeonAdapter from './adapter';
 import { getHTMLForErrorPage } from './get-html-for-error-page';
 import { isAuthAction } from './is-auth-action';
 import { API_BASENAME, api } from './route-builder';
-neonConfig.webSocketConstructor = ws;
 
 const als = new AsyncLocalStorage<{ requestId: string }>();
 
@@ -70,8 +68,11 @@ function LocalAuthAdapter() {
 }
 
 const pool = process.env.DATABASE_URL
-  ? new Pool({
+  ? new pg.Pool({
       connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL.includes('railway.internal')
+        ? false
+        : { rejectUnauthorized: false },
     })
   : null;
 const adapter = pool ? NeonAdapter(pool) : LocalAuthAdapter();

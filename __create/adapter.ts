@@ -5,7 +5,13 @@ import type {
   VerificationToken,
 } from '@auth/core/adapters';
 import type { ProviderType } from '@auth/core/providers';
-import type { Pool } from '@neondatabase/serverless';
+
+type QueryClient = {
+  query: (
+    query: string,
+    values?: unknown[]
+  ) => Promise<{ rowCount: number | null; rows: any[] }>;
+};
 
 interface NeonUser extends AdapterUser {
   accounts: {
@@ -39,7 +45,7 @@ interface NeonAdapter extends Adapter {
   }): Promise<void>;
 }
 
-export default function NeonAdapter(client: Pool): NeonAdapter {
+export default function NeonAdapter(client: QueryClient): NeonAdapter {
   return {
     async createVerificationToken(
       verificationToken: VerificationToken
