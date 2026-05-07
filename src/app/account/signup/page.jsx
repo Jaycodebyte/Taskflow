@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ArrowRight, LogIn, ShieldCheck, UserPlus, Users } from "lucide-react";
 import useAuth from "@/utils/useAuth";
-import { syncAuthProfile } from "@/utils/syncAuthProfile";
 
 function SignUpPage() {
   const [error, setError] = useState(null);
@@ -11,7 +10,7 @@ function SignUpPage() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
 
-  const { signInWithCredentials, signUpWithCredentials } = useAuth();
+  const { signInWithCredentials } = useAuth();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -25,63 +24,34 @@ function SignUpPage() {
     }
 
     try {
-      const result = await signUpWithCredentials({
-        email,
-        password,
-        name,
-        role,
-        callbackUrl: "/dashboard",
-        redirect: false,
+      const registerResponse = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name, role }),
       });
 
-      if (result?.error) {
-        const signInResult = await signInWithCredentials({
-          email,
-          password,
-          callbackUrl: "/dashboard",
-          redirect: false,
-        });
-
-        if (signInResult?.error) {
-          setError("An account with that email may already exist. Try signing in.");
-          setLoading(false);
-          return;
-        }
-
-        await syncAuthProfile({ name, role });
-        window.location.href = signInResult?.url || "/dashboard";
-        return;
-      }
-
-      await syncAuthProfile({ name, role });
-
-      window.location.href = result?.url || "/dashboard";
-    } catch (err) {
-      if (err.message === "Unauthorized") {
-        try {
-          const signInResult = await signInWithCredentials({
-            email,
-            password,
-            callbackUrl: "/dashboard",
-            redirect: false,
-          });
-
-          if (!signInResult?.error) {
-            await syncAuthProfile({ name, role });
-            window.location.href = signInResult?.url || "/dashboard";
-            return;
-          }
-        } catch {
-          /* fall through to the visible error below */
-        }
-      }
-
-      if (err.message === "Unauthorized") {
-        setError("This email already has an account. Please sign in instead.");
+      if (!registerResponse.ok) {
+        const registerError = await registerResponse.json().catch(() => null);
+        setError(registerError?.error || "Unable to create account.");
         setLoading(false);
         return;
       }
 
+      const signInResult = await signInWithCredentials({
+        email,
+        password,
+        callbackUrl: "/dashboard",
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        setError("Account saved, but sign in failed. Please try signing in with this password.");
+        setLoading(false);
+        return;
+      }
+
+      window.location.href = signInResult?.url || "/dashboard";
+    } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
       setLoading(false);
     }

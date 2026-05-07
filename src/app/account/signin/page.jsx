@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ArrowRight, LogIn, UserPlus } from "lucide-react";
 import useAuth from "@/utils/useAuth";
-import { syncAuthProfile } from "@/utils/syncAuthProfile";
 
 function SignInPage() {
   const [error, setError] = useState(null);
@@ -35,8 +34,6 @@ function SignInPage() {
         setLoading(false);
         return;
       }
-
-      await syncAuthProfile(null);
 
       window.location.href = result?.url || "/dashboard";
     } catch (err) {
