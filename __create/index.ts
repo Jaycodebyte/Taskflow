@@ -161,7 +161,10 @@ if (authSecret) {
   app.use(
     '*',
     initAuthConfig((c) => {
-      const secureCookie = new URL(c.req.url).protocol === 'https:';
+      const secureCookie =
+        process.env.AUTH_URL?.startsWith('https://') ||
+        c.req.header('x-forwarded-proto') === 'https' ||
+        new URL(c.req.url).protocol === 'https:';
       const sameSite = secureCookie ? 'none' : 'lax';
 
       return {
