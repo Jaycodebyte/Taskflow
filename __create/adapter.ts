@@ -72,7 +72,7 @@ export default function NeonAdapter(client: QueryClient): NeonAdapter {
       return result.rowCount !== 0 ? result.rows[0] : null;
     },
 
-    async createUser(user: Omit<AdapterUser, 'id'>) {
+    async createUser(user: Omit<AdapterUser, 'id'> & { role?: string }) {
       const { name, email, emailVerified, image } = user;
       const sql = `
         INSERT INTO auth_users (name, email, "emailVerified", image)
@@ -84,7 +84,7 @@ export default function NeonAdapter(client: QueryClient): NeonAdapter {
         emailVerified,
         image,
       ]);
-      return result.rows[0];
+      return { ...result.rows[0], role: user.role };
     },
     async getUser(id: string) {
       const sql = 'select * from auth_users where id = $1';

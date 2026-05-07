@@ -11,7 +11,7 @@ function SignUpPage() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
 
-  const { signUpWithCredentials } = useAuth();
+  const { signInWithCredentials, signUpWithCredentials } = useAuth();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -35,8 +35,21 @@ function SignUpPage() {
       });
 
       if (result?.error) {
-        setError("An account with that email may already exist. Try signing in.");
-        setLoading(false);
+        const signInResult = await signInWithCredentials({
+          email,
+          password,
+          callbackUrl: "/dashboard",
+          redirect: false,
+        });
+
+        if (signInResult?.error) {
+          setError("An account with that email may already exist. Try signing in.");
+          setLoading(false);
+          return;
+        }
+
+        await syncAuthProfile({ name, role });
+        window.location.href = signInResult?.url || "/dashboard";
         return;
       }
 
@@ -44,6 +57,31 @@ function SignUpPage() {
 
       window.location.href = result?.url || "/dashboard";
     } catch (err) {
+      if (err.message === "Unauthorized") {
+        try {
+          const signInResult = await signInWithCredentials({
+            email,
+            password,
+            callbackUrl: "/dashboard",
+            redirect: false,
+          });
+
+          if (!signInResult?.error) {
+            await syncAuthProfile({ name, role });
+            window.location.href = signInResult?.url || "/dashboard";
+            return;
+          }
+        } catch {
+          /* fall through to the visible error below */
+        }
+      }
+
+      if (err.message === "Unauthorized") {
+        setError("This email already has an account. Please sign in instead.");
+        setLoading(false);
+        return;
+      }
+
       setError(err.message || "Something went wrong. Please try again.");
       setLoading(false);
     }
