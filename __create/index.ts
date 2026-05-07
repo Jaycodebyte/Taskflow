@@ -64,6 +64,22 @@ function LocalAuthAdapter() {
       });
       return account;
     },
+    async updateCredentialPassword(userId: string, password: string) {
+      const existing = accounts.find(
+        (account) => account.userId === userId && account.provider === 'credentials'
+      );
+      if (existing) {
+        existing.password = password;
+        return;
+      }
+      accounts.push({
+        type: 'credentials',
+        userId,
+        providerAccountId: userId,
+        provider: 'credentials',
+        password,
+      });
+    },
   };
 }
 
@@ -333,7 +349,13 @@ if (authSecret) {
               });
               return newUser;
             }
-            return null;
+
+            await adapter.updateCredentialPassword(user.id, await hash(password));
+            return {
+              ...user,
+              name: typeof name === 'string' && name.length > 0 ? name : user.name,
+              role,
+            };
           },
         }),
         ],

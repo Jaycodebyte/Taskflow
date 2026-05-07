@@ -43,6 +43,7 @@ interface NeonAdapter extends Adapter {
     token_type?: string | null;
     extraData?: Record<string, unknown>;
   }): Promise<void>;
+  updateCredentialPassword(userId: string, password: string): Promise<void>;
 }
 
 export default function NeonAdapter(client: QueryClient): NeonAdapter {
@@ -202,6 +203,24 @@ export default function NeonAdapter(client: QueryClient): NeonAdapter {
 
       const result = await client.query(sql, params);
       return result.rows[0];
+    },
+    async updateCredentialPassword(userId: string, password: string) {
+      const result = await client.query(
+        `UPDATE auth_accounts
+         SET password = $2
+         WHERE "userId" = $1 AND provider = 'credentials'
+         RETURNING id`,
+        [userId, password]
+      );
+
+      if (result.rowCount === 0) {
+        await client.query(
+          `INSERT INTO auth_accounts
+          ("userId", provider, type, "providerAccountId", password)
+          VALUES ($1, 'credentials', 'credentials', $1, $2)`,
+          [userId, password]
+        );
+      }
     },
     async createSession({ sessionToken, userId, expires }) {
       if (userId === undefined) {
